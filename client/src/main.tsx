@@ -11,6 +11,13 @@ import RegisterPage from './routes/RegisterPage.tsx'
 import SinglePostPage from './routes/SinglePostPage.tsx'
 import MainLayout from './layouts/MainLayout.tsx'
 import MyPosts from './routes/MyPosts.tsx'
+import { ClerkProvider } from '@clerk/clerk-react'
+
+const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
+
+if (!PUBLISHABLE_KEY) {
+  throw new Error('Missing Publishable Key (Clerk)')
+}
 
 const router = createBrowserRouter([
   {
@@ -50,6 +57,8 @@ const router = createBrowserRouter([
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <RouterProvider router={router} />
+    <ClerkProvider publishableKey={PUBLISHABLE_KEY}>
+      <RouterProvider router={router} />
+    </ClerkProvider>
   </StrictMode>,
 )
