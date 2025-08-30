@@ -1,3 +1,5 @@
+import MainCategories from "../components/MainCategories"
+
 const Homepage = () => {
   return (
     <div className='mt-4 flex flex-col gap-4'>
@@ -12,6 +14,7 @@ const Homepage = () => {
           </p>
         </div>
       </div>
+      <MainCategories />
     </div>
   )
 }
