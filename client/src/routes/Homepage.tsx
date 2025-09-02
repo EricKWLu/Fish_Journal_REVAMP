@@ -1,4 +1,5 @@
 import MainCategories from "../components/MainCategories"
+import PostList from "../components/PostList"
 
 const Homepage = () => {
   return (
@@ -15,6 +16,10 @@ const Homepage = () => {
         </div>
       </div>
       <MainCategories />
+      <div className="">
+        <h1 className="my-8 text-2xl text-gray-600">Recent Posts</h1>
+        <PostList />
+      </div>
     </div>
   )
 }
