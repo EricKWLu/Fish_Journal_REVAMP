@@ -1,6 +1,9 @@
 import { Link } from "react-router-dom"
 import ImageCarousel from "../components/ImageCarousel"
 import ImageDefault from "../components/ImageDefault"
+import ActionList from "../components/ActionList"
+import Search from "../components/Search"
+import CommentSection from "../components/CommentSection"
 
 const SinglePostPage = () => {
   return (
@@ -28,7 +31,7 @@ const SinglePostPage = () => {
       </div>
 
       {/*BOTTOM*/}
-      <div className = 'flex flex-row mt-10'>
+      <div className = 'flex flex-row mt-12'>
         {/*Content*/}
         <div className='w-full lg:w-3/4'>
           <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Reiciendis sapiente non soluta nesciunt voluptas sit pariatur temporibus consectetur, recusandae iure. Enim perferendis laborum quisquam distinctio commodi pariatur dolor vero expedita.</p>
@@ -47,14 +50,42 @@ const SinglePostPage = () => {
           <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Assumenda ullam saepe rem error libero numquam. Temporibus obcaecati ex eaque tempora unde, cum, nam itaque minima vero aliquid, nihil iste possimus.</p>
         </div>
         {/*Sidebar*/}
-        <div className="hidden lg:flex lg:w-1/4 flex flex-col text-center ml-4 bg-red-400 sticky top-8 h-fit">
-          <p>Author</p>
-          <div className = "flex flex-row items-center justify-center gap-2 mt-4">
-            <ImageDefault src={"fishPlaceholder.png"} w={75}/>
-            <p>John Smith</p>
+        <div className="hidden lg:flex lg:w-1/4 flex flex-col ml-8 sticky top-8 h-fit">
+          <h1 className="text-sm font-medium">Author</h1>
+
+          {/*Titlecard*/}
+          <div className = "flex flex-row items-center gap-2 mt-4">
+            <div className="w-[50px] h-[50px] overflow-hidden rounded-full">
+              <ImageDefault 
+                src="fishPlaceholder.png"
+                w={50}
+                h={50}
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <Link to = "/">John Smith</Link>
+          </div>
+
+          {/*Actions*/}
+          <ActionList />
+
+          {/*Navigation*/}
+          <div className="flex flex-col gap-y-2 text-sm">
+            <h1 className="font-medium mt-8">Navigation</h1>
+            <Link to = "/" className="underline">Home</Link>
+            <Link to = "/" className="underline">Reports</Link>
+            <Link to = "/" className="underline">Discussion</Link>
+          </div>
+
+          {/*Search*/}
+          <div className="text-sm gap-y-4 flex flex-col mt-8">
+            <h1 className="font-medium">Search</h1>
+            <Search />
           </div>
         </div>
       </div>
+      {/*Comments*/}
+      <CommentSection />
     </div>
   ) 
 }
