@@ -1,3 +1,6 @@
+import MainCategories from "../components/MainCategories"
+import PostList from "../components/PostList"
+
 const Homepage = () => {
   return (
     <div className='mt-4 flex flex-col gap-4'>
@@ -11,6 +14,11 @@ const Homepage = () => {
             Come share and blog your catches!
           </p>
         </div>
+      </div>
+      <MainCategories />
+      <div className="">
+        <h1 className="my-8 text-2xl text-gray-600">Recent Posts</h1>
+        <PostList />
       </div>
     </div>
   )
