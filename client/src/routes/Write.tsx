@@ -28,7 +28,7 @@ const Write = () => {
             <option value="discussions">Discussions</option>
           </select>
         </div>
-        <textarea className="p-4 rounded-xl bg-white shadow-md h-100" name="desc" placeholder="A Short Description" />
+        <textarea className="p-4 rounded-xl bg-white shadow-md" name="desc" placeholder="A Short Description" />
         <ReactQuill theme="snow" className="flex-1 p-2 rounded-xl bg-white shadow-md"/>
         <button className="bg-blue-800 text-white font-medium rounded-xl mt-4 p-2 w-36 mb-4">Send</button>
       </form>
