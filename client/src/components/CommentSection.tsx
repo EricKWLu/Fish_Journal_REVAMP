@@ -1,16 +1,21 @@
+import Comment from "./Comment"
+
 const CommentSection = () => {
   return (
-    <div className='flex flex-col mt-10'>
-        <h1 className='underline text-xl'>
+    <div className='flex flex-col mt-10 gap-8 lg:w-3/5'>
+        <h1 className='underline text-xl text-gray-500'>
             Comments
         </h1>
 
-        <div className='flex flex-row mt-8'>
-            <input type="text" placeholder="Write a comment..." className="rounded-xl w-2/4 h-15 align-top bg-white"/>
+        <div className='flex items-center justify-between gap-8 w-full'>
+            <textarea placeholder="Write a comment..." className="w-full rounded-xl p-4 bg-white"/>
+            <button className="bg-blue-800 px-4 py-3 text-white font-medium rounded-xl">Send</button>
         </div>
 
-        <div className="mt-8">
-            Placeholder
+        <div className="">
+            <Comment />
+            <Comment />
+            <Comment />
         </div>
     </div>
   )
