@@ -18,7 +18,7 @@ const Navbar = () => {
                 {/*MOBILE BUTTON*/}
                 <div className ="cursor-pointer text-2xl" onClick={() =>setOpen(prev => !prev)}>{open ? "X" : "☰"}</div>
                 {/*MOBILE LINK LIST*/}
-                <div className = {`w-full h-screen flex flex-col items-center justify-center absolute top-16 gap-10 font-medium text-large transition-all ease-in-out ${open ? "-right-0" : "-right-[100%]"}`}>
+                <div className = {`w-full bg-blue-50 h-screen flex flex-col items-center justify-center absolute top-16 gap-10 font-medium text-large transition-all ease-in-out ${open ? "-right-0" : "-right-[100%]"}`}>
                     <Link to="/">Home</Link>
                     <Link to="/myposts">Your Posts</Link>
                     <Link to="/">About</Link>
