@@ -3,6 +3,11 @@ import mongoose from "mongoose"
 
 const userSchema = new Schema(
     {
+        clerkUserId: {
+            type: String,
+            required: true,
+            unique: true,
+        },
         user: {
             type: Schema.Types.ObjectId,
             ref: "User",
@@ -26,7 +31,7 @@ const userSchema = new Schema(
             type:String,
         },
         savedPosts: {
-            type:Str [String],
+            type: [String],
             default: [],
         },
     },

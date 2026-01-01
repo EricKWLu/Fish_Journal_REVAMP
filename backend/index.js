@@ -1,10 +1,14 @@
-import express from "express"
-import userRouter from "./routes/user.route.js"
-import postRouter from "./routes/post.route.js"
-import commentRouter from "./routes/comment.route.js"
-import connectDB from "./lib/connectDB.js"
+import express from "express";
+import userRouter from "./routes/user.route.js";
+import postRouter from "./routes/post.route.js";
+import commentRouter from "./routes/comment.route.js";
+import connectDB from "./lib/connectDB.js";
+import webHookRouter from "./routes/webhook.route.js";
+import { clerkMiddleware, requireAuth, getAuth } from "@clerk/express";
 
 const app = express();
+app.use(clerkMiddleware());
+app.use("/webhooks", webHookRouter);
 app.use(express.json());
 
 app.use("/users", userRouter);
