@@ -15,6 +15,11 @@ const postSchema = new Schema(
             type:String,
             required: true,
         },
+        category: {
+            type:String,
+            required: true,
+            default: "general",
+        },
         slug: {
             type:String,
             required: true,
