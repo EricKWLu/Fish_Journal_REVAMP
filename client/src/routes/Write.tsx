@@ -1,6 +1,7 @@
 import {useUser, useAuth} from "@clerk/clerk-react"
 import 'react-quill-new/dist/quill.snow.css'
 import ReactQuill from "react-quill-new"
+import ReactQuillType from "react-quill-new"
 import { useMutation } from "@tanstack/react-query"
 import axios from "axios"
 import type React from "react"
@@ -19,12 +20,22 @@ import {
 const Write = () => {
   // State to keep track of the current upload progress (percentage)
   const [progress, setProgress] = useState(0);
+  const [cover, setCover] = useState("");
 
-  // Create a ref for the file input element to access its files easily
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const quillRef = useRef<ReactQuillType | null>(null);
+
+  // Create a ref for the file input element to access its files easily, one for editor one for cover
+  const coverInputRef = useRef<HTMLInputElement>(null);
+  const editorInputRef = useRef<HTMLInputElement>(null);
 
   // Create an AbortController instance to provide an option to cancel the upload if needed.
   const abortController = new AbortController();
+
+  const {isLoaded, isSignedIn} = useUser();
+  const [value, setValue] = useState('');
+  const {getToken} = useAuth();
+
+  const navigate = useNavigate();
 
   /**
    * Authenticates and retrieves the necessary upload credentials from the server.
@@ -66,72 +77,29 @@ const Write = () => {
    * - Updates the upload progress.
    * - Catches and processes errors accordingly.
    */
-  const handleUpload = async () => {
-      // Access the file input element using the ref
-      const fileInput = fileInputRef.current;
-      if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
-          alert("Please select a file to upload");
-          return;
-      }
+  const uploadCoverImage = async (file: File): Promise<string | null> => {
+    try {
+      const { signature, expire, token, publicKey } = await authenticator();
 
-      // Extract the first file from the file input
-      const file = fileInput.files[0];
+      const res = await upload({
+        file,
+        fileName: file.name,
+        signature,
+        expire,
+        token,
+        publicKey,
+        onProgress: (event) => {
+          setProgress((event.loaded / event.total) * 100);
+        },
+        abortSignal: abortController.signal,
+      });
 
-      // Retrieve authentication parameters for the upload.
-      let authParams;
-      try {
-          authParams = await authenticator();
-      } catch (authError) {
-          console.error("Failed to authenticate for upload:", authError);
-          return;
-      }
-      const { signature, expire, token, publicKey } = authParams;
-
-      // Call the ImageKit SDK upload function with the required parameters and callbacks.
-      try {
-          const uploadResponse = await upload({
-              // Authentication parameters
-              expire,
-              token,
-              signature,
-              publicKey,
-              file,
-              fileName: file.name, // Optionally set a custom file name
-              // Progress callback to update upload progress state
-              onProgress: (event) => {
-                  setProgress((event.loaded / event.total) * 100);
-              },
-              // Abort signal to allow cancellation of the upload if needed.
-              abortSignal: abortController.signal,
-          });
-          console.log("Upload response:", uploadResponse);
-
-          toast.success("Image upload succeeded!");
-
-      } catch (error) {
-          // Handle specific error types provided by the ImageKit SDK.
-          if (error instanceof ImageKitAbortError) {
-              console.error("Upload aborted:", error.reason);
-          } else if (error instanceof ImageKitInvalidRequestError) {
-              console.error("Invalid request:", error.message);
-          } else if (error instanceof ImageKitUploadNetworkError) {
-              console.error("Network error:", error.message);
-          } else if (error instanceof ImageKitServerError) {
-              console.error("Server error:", error.message);
-          } else {
-              // Handle any other errors that may occur.
-              console.error("Upload error:", error);
-          }
-
-          toast.error("Image upload failed!");
-      }
+      return typeof res.url === "string" ? res.url : null;
+    } catch {
+      toast.error("Image upload failed!");
+      return null;
+    }
   };
-
-  const {isLoaded, isSignedIn} = useUser();
-  const [value, setValue] = useState('');
-  const {getToken} = useAuth();
-
-  const navigate = useNavigate();
 
   type NewPost = {
     title: string;
@@ -188,6 +156,78 @@ const Write = () => {
     mutation.mutate(data)
   }
 
+  const insertIntoEditor = (url: string, type: "image" | "video") => {
+    const editor = quillRef.current?.getEditor();
+    if (!editor) return;
+
+    const range = editor.getSelection(true);
+    editor.insertEmbed(range.index, type, url);
+    editor.setSelection(range.index + 1);
+  };
+
+  const uploadEditorFile = async (): Promise<string | null> => {
+  const file = editorInputRef.current?.files?.[0];
+  if (!file) return null;
+
+  if (file.size > 50 * 1024 * 1024) {
+    toast.error("File too large");
+    return null;
+  }
+
+  const { signature, expire, token, publicKey } = await authenticator();
+
+  const res = await upload({
+    file,
+    fileName: file.name,
+    signature,
+    expire,
+    token,
+    publicKey,
+    onProgress: (e) =>
+      setProgress((e.loaded / e.total) * 100),
+  });
+
+  if (!res.url) {
+    toast.error("Upload succeeded but no URL returned");
+    return null;
+  }
+
+  return res.url;
+};
+
+    //Used for react quill video/image insert
+  const modules = {
+  toolbar: {
+    container: [
+      [{ header: [1, 2, 3, false] }],
+      ["bold", "italic", "underline", "strike"],
+      [{ list: "ordered" }, { list: "bullet" }],
+      ["link", "image", "video"],
+      ["clean"],
+    ],
+    handlers: {
+      image: async () => {
+        editorInputRef.current?.click();
+
+        // wait for file selection
+        setTimeout(async () => {
+          const url = await uploadEditorFile();
+          if (url) insertIntoEditor(url, "image");
+        }, 0);
+      },
+
+      video: async () => {
+        editorInputRef.current?.click();
+
+        setTimeout(async () => {
+          const url = await uploadEditorFile();
+          if (url) insertIntoEditor(url, "video");
+        }, 0);
+      },
+    },
+  },
+};
+
   return (
     <div className='min-h-[calc(100vh-64px) md:min-h-[calc(100vh-80px)] flex flex-col gap-6'>
       <h1 className="text-xl font-light text-gray-500">Create a New Post</h1>
@@ -195,19 +235,29 @@ const Write = () => {
 
         <input
           type="file"
-          ref={fileInputRef}
+          ref={coverInputRef}
           hidden
           accept="image/*"
-          onChange={() => {
-            // optional: auto-upload after picking
-            handleUpload();
-          }}
+          onChange={async () => {
+            const file = coverInputRef.current?.files?.[0];
+            if (!file) return;
+
+            if (file.size > 10 * 1024 * 1024) {
+              toast.error("Cover image must be under 10MB");
+              return;
+            }
+
+            const url = await uploadCoverImage(file);
+            if (url) {
+              setCover(url);
+            }
+                  }}
         />
 
         <button
           type="button"
           className="p-2 shadow-md rounded-xl text-sm text-gray-500 bg-white w-max"
-          onClick={() => fileInputRef.current?.click()}
+          onClick={() => coverInputRef.current?.click()}
         >
           Add cover images
         </button>
@@ -226,11 +276,14 @@ const Write = () => {
         </div>
         <textarea className="p-4 rounded-xl bg-white shadow-md" name="desc" placeholder="A Short Description" />
         <div className="flex">
-          <div className="flex flex-col gap-2 mr-2">
-            <div className='cursor-pointer'>🖼️</div>
-            <div className="cursor-pointer">🎥</div>
-          </div>
-          <ReactQuill theme="snow" className="flex-1 p-2 rounded-xl bg-white shadow-md" onChange={setValue}/>
+          <input
+            ref={editorInputRef}
+            type="file"
+            hidden
+            accept="image/*,video/*"
+          />
+
+          <ReactQuill theme="snow" ref={quillRef} className="flex-1 p-2 rounded-xl bg-white shadow-md" onChange={setValue} modules={modules} value={value}/>
         </div>
         <button disabled={mutation.isPending} className="bg-blue-800 text-white font-medium rounded-xl mt-4 p-2 w-36 mb-4 disabled:bg-blue-400 disabled:cursor-not-allowed">
           {mutation.isPending ? "Loading..." : "Send"}
