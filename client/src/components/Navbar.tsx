@@ -7,6 +7,7 @@ import ImageDefault from "./ImageDefault";
 const Navbar = () => {
     const [open, setOpen] = useState(false);
 
+    //DELETE LATER
     const {getToken} = useAuth();
 
     useEffect(()=>{

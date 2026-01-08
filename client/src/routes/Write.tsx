@@ -1,6 +1,6 @@
 import {useUser, useAuth} from "@clerk/clerk-react"
 import 'react-quill-new/dist/quill.snow.css'
-import ReactQuill from "react-quill-new"
+import ReactQuill, { Quill } from "react-quill-new"
 import ReactQuillType from "react-quill-new"
 import { useMutation } from "@tanstack/react-query"
 import axios from "axios"
@@ -15,12 +15,15 @@ import {
     ImageKitUploadNetworkError,
     upload,
 } from "@imagekit/react";
-
+import { useEffect } from "react"
+import QuillResize from 'quill-resize-image'
 
 const Write = () => {
   // State to keep track of the current upload progress (percentage)
   const [progress, setProgress] = useState(0);
   const [cover, setCover] = useState("");
+  const [pendingEmbed, setPendingEmbed] = useState<"image" | "video" | null>(null);
+
 
   const quillRef = useRef<ReactQuillType | null>(null);
 
@@ -144,6 +147,7 @@ const Write = () => {
     }
 
     const data = {
+      img: cover || "",
       title,
       category,
       desc,
@@ -163,70 +167,67 @@ const Write = () => {
     const range = editor.getSelection(true);
     editor.insertEmbed(range.index, type, url);
     editor.setSelection(range.index + 1);
+
+    setValue(editor.root.innerHTML);
   };
 
   const uploadEditorFile = async (): Promise<string | null> => {
-  const file = editorInputRef.current?.files?.[0];
-  if (!file) return null;
+    const file = editorInputRef.current?.files?.[0];
+    if (!file) return null;
 
-  if (file.size > 50 * 1024 * 1024) {
-    toast.error("File too large");
-    return null;
-  }
+    if (file.size > 50 * 1024 * 1024) {
+      toast.error("File too large");
+      return null;
+    }
 
-  const { signature, expire, token, publicKey } = await authenticator();
+    const { signature, expire, token, publicKey } = await authenticator();
 
-  const res = await upload({
-    file,
-    fileName: file.name,
-    signature,
-    expire,
-    token,
-    publicKey,
-    onProgress: (e) =>
-      setProgress((e.loaded / e.total) * 100),
-  });
+    const res = await upload({
+      file,
+      fileName: file.name,
+      signature,
+      expire,
+      token,
+      publicKey,
+      onProgress: (e) =>
+        setProgress((e.loaded / e.total) * 100),
+    });
 
-  if (!res.url) {
-    toast.error("Upload succeeded but no URL returned");
-    return null;
-  }
+    if (!res.url) {
+      toast.error("Upload succeeded but no URL returned");
+      return null;
+    }
 
-  return res.url;
-};
+    return res.url;
+  };
+
+  Quill.register('modules/resize', QuillResize);
 
     //Used for react quill video/image insert
   const modules = {
-  toolbar: {
-    container: [
-      [{ header: [1, 2, 3, false] }],
-      ["bold", "italic", "underline", "strike"],
-      [{ list: "ordered" }, { list: "bullet" }],
-      ["link", "image", "video"],
-      ["clean"],
-    ],
-    handlers: {
-      image: async () => {
-        editorInputRef.current?.click();
-
-        // wait for file selection
-        setTimeout(async () => {
-          const url = await uploadEditorFile();
-          if (url) insertIntoEditor(url, "image");
-        }, 0);
-      },
-
-      video: async () => {
-        editorInputRef.current?.click();
-
-        setTimeout(async () => {
-          const url = await uploadEditorFile();
-          if (url) insertIntoEditor(url, "video");
-        }, 0);
+    toolbar: {
+      container: [
+        [{ header: [1, 2, 3, false] }],
+        ["bold", "italic", "underline", "strike"],
+        [{ list: "ordered" }, { list: "bullet" }],
+        ["link", "image", "video"],
+        ["clean"],
+      ],
+      handlers: {
+        image: () => {
+          setPendingEmbed("image");
+          editorInputRef.current?.click();
+        },
+        video: () => {
+          setPendingEmbed("video");
+          editorInputRef.current?.click();
+        },
       },
     },
-  },
-};
+    resize: {
+      modules: ['Resize', 'DisplaySize']
+    },
+  };
 
   return (
     <div className='min-h-[calc(100vh-64px) md:min-h-[calc(100vh-80px)] flex flex-col gap-6'>
@@ -259,13 +260,23 @@ const Write = () => {
           className="p-2 shadow-md rounded-xl text-sm text-gray-500 bg-white w-max"
           onClick={() => coverInputRef.current?.click()}
         >
-          Add cover images
+          Upload cover image
         </button>
         <br />
         {/* Display the current upload progress */}
         Upload progress: <progress value={progress} max={100}></progress>
 
-        <input className="text-4xl font-semibold bg-transparent outline-none text-gray-400" type="text" placeholder="My Awesome Post" name="title"/>
+        {cover && (
+          <div className="w-full max-w-xl">
+            <img
+              src={cover}
+              alt="Cover preview"
+              className="rounded-xl shadow-md object-cover max-h-80 w-full"
+            />
+          </div>
+        )}
+
+        <input className="text-4xl font-semibold bg-transparent outline-none text-gray-400" type="text" placeholder="Insert Title" name="title"/>
         <div className="flex items-center gap-4">
           <label className="text-sm">Choose a category:</label>
           <select name="category" id="" className="p-2 rounded-xl bg-white shadow-md">
@@ -281,6 +292,21 @@ const Write = () => {
             type="file"
             hidden
             accept="image/*,video/*"
+            onChange={async () => {
+              if (!pendingEmbed) return;
+
+              const file = editorInputRef.current?.files?.[0];
+              if (!file) return;
+
+              const url = await uploadEditorFile();
+              if (url) {
+                insertIntoEditor(url, pendingEmbed);
+              }
+
+              // cleanup
+              setPendingEmbed(null);
+              editorInputRef.current!.value = "";
+            }}
           />
 
           <ReactQuill theme="snow" ref={quillRef} className="flex-1 p-2 rounded-xl bg-white shadow-md" onChange={setValue} modules={modules} value={value}/>
