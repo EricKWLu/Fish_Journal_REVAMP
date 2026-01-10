@@ -1,9 +1,14 @@
 import { Link } from "react-router-dom"
 import ImageDefault from "./ImageDefault"
+import type { Post } from "../types/potsType"
 
-const SinglePost = () => {
+interface SinglePostProps {
+  post: Post
+}
+
+const SinglePost = ({ post }: SinglePostProps) => {
   return (
-    <div className='flex flex-col xl:flex-row gap-8'>
+    <div className='flex flex-col xl:flex-row gap-8 mb-10'>
         {/*Image*/}
         <div className="md:hidden xl:block xl:w-1/3">
             <ImageDefault src="/fishPlaceholder.png" className="rounded-2xl object-cover" w={800}/>
