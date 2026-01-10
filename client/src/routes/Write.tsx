@@ -18,6 +18,29 @@ import {
 import { useEffect } from "react"
 import QuillResize from 'quill-resize-image'
 
+// Get the existing Video blot
+const BlockEmbed = Quill.import('blots/block/embed') as any;
+
+class VideoBlot extends BlockEmbed {
+  static create(url: string) {
+    const node = super.create();
+    node.setAttribute('src', url);
+    node.setAttribute('controls', 'true'); // Show play/pause buttons
+    node.setAttribute('width', '75%');   // Default styling
+    node.setAttribute('style', 'max-height: 500px');
+    return node;
+  }
+
+  static value(node: HTMLElement) {
+    return node.getAttribute('src');
+  }
+}
+
+VideoBlot.blotName = 'video';
+VideoBlot.tagName = 'video'; // Use HTML5 video tag instead of iframe
+
+Quill.register(VideoBlot);
+
 const Write = () => {
   // State to keep track of the current upload progress (percentage)
   const [progress, setProgress] = useState(0);
@@ -166,7 +189,11 @@ const Write = () => {
 
     const range = editor.getSelection(true);
     editor.insertEmbed(range.index, type, url);
-    editor.setSelection(range.index + 1);
+    const nextPosition = range.index + 1;
+    
+    editor.insertText(nextPosition, '\n');
+    
+    editor.setSelection(nextPosition + 1);
 
     setValue(editor.root.innerHTML);
   };
@@ -280,7 +307,6 @@ const Write = () => {
         <div className="flex items-center gap-4">
           <label className="text-sm">Choose a category:</label>
           <select name="category" id="" className="p-2 rounded-xl bg-white shadow-md">
-            <option value="general">General</option>
             <option value="reports">Reports</option>
             <option value="discussions">Discussions</option>
           </select>
