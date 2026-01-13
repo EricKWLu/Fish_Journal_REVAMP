@@ -103,7 +103,7 @@ const SinglePostPage = () => {
         </div>
       </div>
       {/*Comments*/}
-      <CommentSection />
+      <CommentSection postId={data._id}/>
     </div>
   ) 
 }

@@ -1,6 +1,12 @@
+import type { CommentType } from "../types/commentType";
 import ImageDefault from "./ImageDefault"
 
-const Comment = () => {
+type InputCommentType = {
+  comment: CommentType;
+  postId: string;
+};
+
+const Comment = ({comment, postId}: InputCommentType) => {
   return (
     <div className='p-4 bg-slate-50 rounded-xl mb-8'>
       <div className="flex items-center gap-4">
@@ -12,7 +18,7 @@ const Comment = () => {
       </div>
       <div className="mt-4">
         <p>
-          Lorem ipsum dolor sit amet consectetur, adipisicing elit. Repellat fuga impedit pariatur, quo non ratione, deserunt velit reiciendis neque iusto consequatur at nulla aspernatur, quasi sit! Id alias molestiae iure.
+          Lorem ipsum dolor sit amet consectetur, adipisicing elit. Repellat fuga impedit pariatur, quo non ratione, deserunt velit reiciendis neque iusto consequatur at nulla aspernatur, quasi sit! Id alias molestiae iure. {comment.desc} {postId}
         </p>
       </div>
     </div>
