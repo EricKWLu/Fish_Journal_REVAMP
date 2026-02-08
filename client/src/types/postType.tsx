@@ -2,6 +2,7 @@ export interface User {
   _id: string
   username: string
   name: string
+  img?: string
 }
 
 export interface Post {

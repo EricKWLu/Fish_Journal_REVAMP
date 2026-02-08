@@ -13,4 +13,5 @@ export type CommentType = {
   desc: string;
   user: User;
   post: Post;
+  createdAt: Date;
 }

@@ -69,7 +69,8 @@ const CommentSection = ({postId}: CommentSectionProps) => {
       </form>
 
       <div className="">
-        {data.map((comment) => (
+        {isPending ? "Loading..." : error ? "Error loading comments!" : 
+        data.map((comment) => (
           <Comment key={comment._id} comment={comment} postId={postId}/>
         ))}
       </div>
