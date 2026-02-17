@@ -37,7 +37,8 @@ const CommentSection = ({postId}: CommentSectionProps) => {
     },
     onError:(error)=>{
       if (axios.isAxiosError(error)) {
-        toast.error(error.response?.data || "Something went wrong");
+        const serverMessage = error.response?.data?.error || error.response?.data;
+        toast.error(serverMessage || "Something went wrong");
       } else {
         toast.error("Unexpected error");
       }

@@ -146,7 +146,19 @@ const Write = () => {
     onSuccess:(res)=>{
       toast.success("Post has been created");
       navigate(`/${res.data.slug}`);
-    }
+    },
+    onError: (error) => {
+  if (axios.isAxiosError(error)) {
+    const serverMessage = 
+      error.response?.data?.error || 
+      error.response?.data || 
+      error.response?.statusText;
+
+    toast.error(serverMessage || "Something went wrong");
+  } else {
+    toast.error("Unexpected error");
+  }
+}
   })
 
   if(!isLoaded) {
