@@ -1,6 +1,6 @@
 export interface User {
   _id: string
-  username: string
+  username: string | null
   name: string
   img?: string
 }

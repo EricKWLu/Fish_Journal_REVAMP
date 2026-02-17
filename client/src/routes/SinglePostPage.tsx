@@ -85,7 +85,7 @@ const SinglePostPage = () => {
           </div>
 
           {/*Actions*/}
-          <ActionList />
+          <ActionList post={data}/>
 
           {/*Navigation*/}
           <div className="flex flex-col gap-y-2 text-sm">

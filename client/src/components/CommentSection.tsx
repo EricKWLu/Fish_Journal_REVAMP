@@ -31,7 +31,7 @@ const CommentSection = ({postId}: CommentSectionProps) => {
         }
       })
     },
-    onSuccess:(res)=>{
+    onSuccess:()=>{
       queryClient.invalidateQueries({queryKey: ["comments", postId]})
     },
     onError:(error)=>{
