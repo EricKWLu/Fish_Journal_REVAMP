@@ -33,6 +33,7 @@ const CommentSection = ({postId}: CommentSectionProps) => {
     },
     onSuccess:()=>{
       queryClient.invalidateQueries({queryKey: ["comments", postId]})
+      toast.success("Comment created successfully")
     },
     onError:(error)=>{
       if (axios.isAxiosError(error)) {

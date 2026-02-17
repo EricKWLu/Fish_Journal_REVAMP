@@ -40,7 +40,7 @@ export const deleteComment = async (req, res)=>{
     return res.status(401).json("Not authenticated!");
   }
 
-  const user = User.findOne({clerkUserId});
+  const user = await User.findOne({clerkUserId});
 
   const deletedComment = await Comment.findOneAndDelete({_id: id, user: user._id})
 
